@@ -1,3 +1,4 @@
+#include "graph.cpp"
 #include <string>
 #include <cmath>
 #include <unordered_map>
@@ -50,14 +51,42 @@ int rectS(x1, y1, x2, y2) {
 };
 
 struct Rect {
+    Rect(int x1, int x2, int y1, int y2)
+        : x1(x1), x2(x2), y1(y1), y2(y2) {}
+
+    int k = 4;
     int x1;
     int x2;
     int y1;
     int y2;
 };
 
-vector<int, int, int, int> getRectsFromGroups(unordered_map groups, int imWidht, int imHeight) {
-
+vector <Rect> getRectsFromGroups(unordered_map groups, int imWidth, int imHeight) {
+    vector <Rect> rects;
+    int s = imWidth * imHeight;
+    for (int key : groups.keys()) {
+        x_min = 99999;
+        x_max = -1;
+        y_min = 99999;
+        y_max = -1;
+        for (std::pair<int, int> xy :groups[key]) {
+            if (x_max < xy.first) {
+                x_max = xy.first;
+            } else if (x_min > xy.first) {
+                x_min = xy.first;
+            } else if (y_max < xy.second) {
+                y_max = xy.second;
+            } else if (y_min > xy.second) {
+                y_min = xy.second;
+            }
+        }
+        int S = rect_S(xmin, ymin, xmax, ymax);
+        maxS_k = 0.4;
+        if (S < maxS_k * imS) {
+            rects.append(Rect(xmin, ymin, xmax, ymax));
+        }
+    }
+    return rects;
 };
 
 
@@ -70,7 +99,46 @@ int main() {
     cv::inRange(hsv, {0, 120, 80}, {40, 255, 255}, mask);
     cv::Mat res;
     bitwise_and(res, res, res, mask);
-    cv::imwrite("res.jpg", res);
+
+    cv::Mat res_gray;
+    cv::cvtColor(res, res_gray, cv::COLOR_HSV2GRAY);
+
+    cv::Mat temp_img;
+    std::pair<int> size1{res_gray.size()[0], res_gray.size()[1]};
+    std::pair<int> size2{res_gray.size()[0] / 4, res_gray.size()[1] / 4};
+    cv::resize(res_gray, temp_img, size2);
+
+    const int neighbor = 4;
+    const float sigma = .2;
+    const float k = .3;
+    const int min_size = 100;
+
+    cv::Mat grid = gaussian_grid(sigma);
+
+    cv::Mat smooth = filter_image(temp_img, grid);
+
+    std::vector <Edge> img_graph = build_graph(smooth, size2.second, size2.first);
+
+    Forest forest = segment_graph(img_graph, size2.first * size2.secont, k, min_size);
+
+    unordered_map groups = groupByParent(forest, size2.second, size2.first);
+
+    std::vector <Rect> rects = getRectsFromGroups(groups, size2.second, size2.first);
+
+    for (int i = 0; i < rects.size(); ++i) {
+        Rect& r = rects[i];
+        vector<int> box = {rect.y1, rect.x1, rect.y2, rect.x2};
+        vector<int> box_orig;
+        for (int b : box) {
+            box_orig.push_back(b * r.k);
+        }
+        CVMat* imgsrc = &img;
+        cv::Mat image(imgsrc);
+        cv::Rect my_roi(rect.y1, rect.x1, rect.y2, rect.x2);
+        char* c = nullptr;
+        sprintf(c, "../train/fragments/%d.jpg", i);
+        cv::imwrite(c, image(my_roi));
+    }
 
     return 0;
 }

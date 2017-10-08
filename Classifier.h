@@ -39,11 +39,6 @@ public:
 
     void getTrainFeatures(std::string);
     void train(std::string,std::string);
-
-
-
-
-
 };
 
 

@@ -47,5 +47,5 @@ cv::Mat filter_image(cv::Mat image, vector < vector <double> > mask){
       filtred.at<Vec3b>(i, j) = value;
     }
   }
-  return filtred
+  return filtred;
 }

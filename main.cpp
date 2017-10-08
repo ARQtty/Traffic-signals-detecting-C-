@@ -7,7 +7,7 @@ int main() {
     //cv::imshow("img",img);
     //cv::waitKey(1000);
     //myClassifier.getTrainFeatures("/home/mostafa/Downloads/rtsd-r3/train/*.jpg");
-    myClassifier.train("/home/mostafa/Downloads/rtsd-r3/train/*.jpg","/home/mostafa/Downloads/rtsd-r3/gt_train.csv");
+    myClassifier.train("./train/*.jpg","./rtsd-r3/gt_train.csv");
     cv::Mat img_gray;
     cv::cvtColor(img,img_gray,cv::COLOR_RGB2GRAY);
     myClassifier.img=img_gray;
