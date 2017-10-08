@@ -28,8 +28,8 @@ vector < vector <double> > gaussian_grid(double sig){
    return x2_plus_y2;
 };
 
-img_type____ filter_image(img_type____ image, vector < vector <double> > mask){
-  img_type____ filtred;
+cv::Mat filter_image(cv::Mat image, vector < vector <double> > mask){
+  cv::Mat filtred;
   for (int i=0; i<image.sizeX___; ++i){
     int k = i + 2;
     for (var j=0; j<image.sizeY___; ++j){
